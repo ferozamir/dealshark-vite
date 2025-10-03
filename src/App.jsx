@@ -1,44 +1,112 @@
-import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { AuthProvider } from './context/AuthContext';
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+import ProtectedRoute from './components/common/ProtectedRoute';
+
+// Pages
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/auth/LoginPage';
+import SignUpPage from './pages/auth/SignUpPage';
+import OTPVerificationPage from './pages/auth/OTPVerificationPage';
+import BusinessOnboarding from './pages/auth/BusinessOnboarding';
+import DealsPage from './pages/DealsPage';
+import DealDetailPage from './pages/DealDetailPage';
+import BusinessProfile from './pages/BusinessProfile';
+import CreateDealPage from './pages/business/CreateDealPage';
+import MySubscriptionsPage from './pages/customer/MySubscriptionsPage';
+import MySubscribersPage from './pages/business/MySubscribersPage';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            🦈 DealShark
-          </h1>
-          <p className="text-gray-600">
-            Your React + Vite + Tailwind CSS project is ready!
-          </p>
+    <AuthProvider>
+      <Router>
+        <div className="min-h-screen bg-gray-50 flex flex-col">
+          <Header />
+          <main className="flex-1">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/deals" element={<DealsPage />} />
+              <Route path="/deal/:dealId" element={<DealDetailPage />} />
+              <Route path="/business/:businessId" element={<BusinessProfile />} />
+              
+              {/* Auth Routes */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignUpPage />} />
+              <Route path="/otp-verification" element={<OTPVerificationPage />} />
+              <Route path="/business-onboarding" element={<BusinessOnboarding />} />
+              
+              {/* Protected Routes - Business Only */}
+              <Route 
+                path="/create-deal" 
+                element={
+                  <ProtectedRoute allowedUserTypes={['business']}>
+                    <CreateDealPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/my-subscribers" 
+                element={
+                  <ProtectedRoute allowedUserTypes={['business']}>
+                    <MySubscribersPage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Protected Routes - Customer Only */}
+              <Route 
+                path="/my-subscriptions" 
+                element={
+                  <ProtectedRoute allowedUserTypes={['customer']}>
+                    <MySubscriptionsPage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Protected Routes - Both */}
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute allowedUserTypes={['customer', 'business']}>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } 
+              />
+            </Routes>
+          </main>
+          <Footer />
         </div>
-        
-        <div className="bg-gray-50 rounded-lg p-6 mb-6">
-          <div className="text-6xl font-bold text-indigo-600 mb-4">
-            {count}
-          </div>
-          <button 
-            onClick={() => setCount((count) => count + 1)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
-          >
-            Click me!
-          </button>
-        </div>
-        
-        <p className="text-sm text-gray-500">
-          Edit <code className="bg-gray-100 px-2 py-1 rounded text-xs">src/App.jsx</code> and save to test HMR
-        </p>
-        
-        <div className="mt-6 flex justify-center space-x-4 text-xs text-gray-400">
-          <span>⚡ Vite</span>
-          <span>⚛️ React</span>
-          <span>🎨 Tailwind</span>
-        </div>
-      </div>
-    </div>
-  )
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+            success: {
+              duration: 3000,
+              iconTheme: {
+                primary: '#10b981',
+                secondary: '#fff',
+              },
+            },
+            error: {
+              duration: 5000,
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
+      </Router>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;
