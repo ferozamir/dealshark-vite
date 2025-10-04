@@ -289,7 +289,7 @@ const HomePage = () => {
                         )}
                       </div>
                       {deal.is_featured && (
-                        <div className="bg-red-500 text-white text-xs px-3 py-1 rounded-full flex items-center font-semibold">
+                        <div className="bg-dealshark-yellow text-white text-xs px-3 py-1 rounded-full flex items-center font-semibold">
                           <StarIcon className="h-3 w-3 mr-1 fill-current" />
                           FEATURED
                         </div>
@@ -297,7 +297,7 @@ const HomePage = () => {
                     </div>
 
                     {/* Category Badge */}
-                    <div className="absolute top-4 left-6 bg-dealshark-yellow text-gray-900 text-xs px-2 py-1 rounded-full font-medium">
+                    <div className="w-fit bg-dealshark-yellow text-gray-900 text-xs px-2 py-1 rounded-full font-medium">
                       {deal.business?.industry || 'General'}
                     </div>
                   </div>

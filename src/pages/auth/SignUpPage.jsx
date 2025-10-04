@@ -79,9 +79,14 @@ const SignUpPage = () => {
 
     try {
       const result = await register(formData.email, formData.password, formData.user_type, {
+        email: formData.email,
         first_name: formData.firstName,
         last_name: formData.lastName,
-        phone_number: formData.phone_number
+        phone_number: formData.phone_number,
+        user_type: formData.user_type,
+        password: formData.password,
+        confirm_password: formData.confirm_password,
+        profile_picture: formData.profilePicture ? 'url' : null
       });
 
       if (result.success) {
@@ -106,35 +111,6 @@ const SignUpPage = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-dealshark-blue">
-      {/* Header */}
-      {/* <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
-              <span className="text-2xl font-bold hover-scale transition-bounce">
-                <span className="text-dealshark-blue">Deal</span>
-                <span className="text-dealshark-yellow">Shark</span>
-                <SparklesIcon className="h-6 w-6 text-dealshark-yellow animate-pulse ml-2" />
-              </span>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <button 
-                className="btn-primary text-sm hover-lift"
-                onClick={() => navigate('/login')}
-              >
-                Sign In
-              </button>
-              <button 
-                className="btn-secondary text-sm hover-lift"
-                onClick={() => navigate('/signup')}
-              >
-                Register
-              </button>
-            </div>
-          </div>
-        </div>
-      </header> */}
 
       {/* Main Content */}
       <main className="flex-1">

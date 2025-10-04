@@ -215,45 +215,46 @@ const DealDetailPage = () => {
                 </div>
 
                 {/* Deal Title and Description */}
-                <div className="mb-6">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                <div className="mb-4">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-3">
                     {deal.deal_name}
                   </h2>
-                  <p className="text-gray-700 text-lg leading-relaxed">
+                  <p className="text-gray-700 leading-relaxed">
                     {deal.deal_description}
                   </p>
                 </div>
 
                 {/* Reward Badge */}
                 <div className="mb-6">
-                  <div className={`inline-flex items-center px-6 py-3 rounded-full text-white text-lg font-semibold bg-gradient-to-r ${getRewardColor(deal)}`}>
+                  <div className={`inline-flex items-center px-5 py-2 rounded-full text-sm text-white font-semibold bg-gradient-to-r ${getRewardColor(deal)}`}>
                     {deal.reward_type === 'commission' ? (
                       <CurrencyDollarIcon className="h-5 w-5 mr-2" />
                     ) : (
                       <GiftIcon className="h-5 w-5 mr-2" />
                     )}
-                    {getRewardDisplay(deal)}
+                    {/* {getRewardDisplay(deal)} */}
+                    {deal.poster_text}
                   </div>
                 </div>
 
                 {/* Deal Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-center p-4 bg-gray-50 rounded-lg align-middle content-center">
                     <div className="text-2xl font-bold text-gray-900">{deal.subscribers_count || 0}</div>
                     <div className="text-sm text-gray-600">Subscribers</div>
                   </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-center p-4 bg-gray-50 rounded-lg align-middle content-center">
                     <div className="text-2xl font-bold text-gray-900">{deal.business?.business_subscribers_count || 0}</div>
                     <div className="text-sm text-gray-600">Business Total</div>
                   </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-900">
+                  <div className={`text-center p-4 bg-gray-50 rounded-lg align-middle content-center ${deal.is_active ? 'bg-green-100' : 'bg-red-100'}`}>
+                    <div className="text-sm text-gray-600">Status</div>
+                    <div className={`font-bold text-gray-900 px-4 py-1 mx-auto w-fit rounded-full ${deal.is_active ? 'text-green-600' : 'text-red-600'}`}>
                       {deal.is_active ? 'Active' : 'Inactive'}
                     </div>
-                    <div className="text-sm text-gray-600">Status</div>
                   </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-center p-4 bg-gray-50 rounded-lg align-middle content-center">
+                    <div className="font-bold text-gray-900">
                       {formatDate(deal.created_at)}
                     </div>
                     <div className="text-sm text-gray-600">Created</div>
@@ -397,7 +398,7 @@ const DealDetailPage = () => {
 
         {/* Login Modal */}
         {showLoginModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-[#00000040] flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl p-8 max-w-md mx-4">
               <div className="text-center">
                 <div className="w-16 h-16 bg-dealshark-blue rounded-full flex items-center justify-center mx-auto mb-4">
