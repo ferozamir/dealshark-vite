@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { referralsService } from '../services';
 import { 
-  CopyIcon, 
+  ClipboardIcon, 
   UserIcon, 
   CurrencyDollarIcon,
   LinkIcon,
@@ -102,45 +102,7 @@ const MySubscriptionsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-dealshark-blue to-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">🦈</span>
-              </div>
-              <span className="text-2xl font-bold">
-                <span className="text-dealshark-blue">Deal</span>
-                <span className="text-dealshark-yellow">Shark</span>
-              </span>
-            </div>
-
-            {/* Search Bar */}
-            <div className="flex-1 max-w-lg mx-8">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search brands and stores"
-                  className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dealshark-blue focus:border-dealshark-blue"
-                />
-                <MagnifyingGlassIcon className="h-5 w-5 text-dealshark-yellow absolute right-3 top-1/2 transform -translate-y-1/2" />
-              </div>
-            </div>
-
-            {/* User Actions */}
-            <div className="flex items-center space-x-4">
-              <span className="text-dealshark-blue font-medium">My Subscriptions</span>
-              <div className="flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-2">
-                <UserCircleIcon className="h-5 w-5 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">Account</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
+ 
       {/* User Profile Section */}
       <div className="bg-dealshark-blue">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -270,7 +232,7 @@ const MySubscriptionsPage = () => {
                       onClick={() => handleCopyUrl(subscription.referral_link)}
                       className="flex-1 bg-dealshark-blue text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
                     >
-                      <CopyIcon className="h-4 w-4" />
+                      <ClipboardIcon className="h-4 w-4" />
                       <span>Copy URL</span>
                     </button>
                     <button
