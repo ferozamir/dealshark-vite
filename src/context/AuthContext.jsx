@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }) => {
   const verifyToken = async () => {
     try {
       const response = await authService.getProfile();
-      
+
       if (response.success) {
         const profile = response.profile;
         dispatch({
@@ -114,10 +114,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password, userType = 'customer') => {
     dispatch({ type: 'LOGIN_START' });
-    
+
     try {
       let response;
-      
+
       if (userType === 'business') {
         response = await authService.businessLogin(email, password);
       } else {
@@ -134,7 +134,7 @@ export const AuthProvider = ({ children }) => {
             userType: response.user?.user_type || userType,
           },
         });
-        
+
         const userName = response.user?.first_name || response.user?.name || 'User';
         toast.success(`Welcome back, ${userName}!`);
         return { success: true };
@@ -150,17 +150,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (email, password, userType = 'customer', additionalData = {}) => {
+  const register = async (
+    firstName,
+    lastName,
+    email,
+    phone_number,
+    password,
+    confirm_password,
+    user_type = "customer",
+    profile_picture = null
+  ) => {
     dispatch({ type: 'LOGIN_START' });
-    
+
     try {
       const userData = {
+        firstName,
+        lastName,
         email,
+        phone_number,
         password,
-        confirm_password: password, // Assuming same password for confirmation
-        userType,
-        ...additionalData,
+        confirm_password,
+        user_type
       };
+
+      if (profile_picture) {
+        userData.profile_picture = profile_picture;
+      }
 
       const response = await authService.register(userData);
 
@@ -182,7 +197,7 @@ export const AuthProvider = ({ children }) => {
 
   const businessRegister = async (businessData) => {
     dispatch({ type: 'LOGIN_START' });
-    
+
     try {
       const response = await authService.businessRegister(businessData);
 
@@ -211,15 +226,15 @@ export const AuthProvider = ({ children }) => {
         if (response.user) {
           dispatch({
             type: 'LOGIN_SUCCESS',
-          payload: {
-            user: response.user,
-            business: response.business || null,
-            token: tokenManager.getAccessToken(), // Token should be set by authService
-            userType: response.user?.user_type || 'customer',
-          },
+            payload: {
+              user: response.user,
+              business: response.business || null,
+              token: tokenManager.getAccessToken(), // Token should be set by authService
+              userType: response.user?.user_type || 'customer',
+            },
           });
         }
-        
+
         toast.success(response.message || 'Email verified successfully!');
         return { success: true };
       } else {
@@ -270,7 +285,7 @@ export const AuthProvider = ({ children }) => {
   const refreshProfile = async () => {
     try {
       const response = await authService.getProfile();
-      
+
       if (response.success) {
         const profile = response.profile;
         updateUser(profile.user || profile);
@@ -279,7 +294,7 @@ export const AuthProvider = ({ children }) => {
         }
         return { success: true };
       }
-      
+
       return { success: false, error: response.error };
     } catch (error) {
       return { success: false, error: 'Failed to refresh profile' };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { 
@@ -6,7 +6,9 @@ import {
   ClockIcon,
   ShieldCheckIcon,
   SparklesIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  EnvelopeIcon,
+  KeyIcon
 } from '@heroicons/react/24/outline';
 
 const OTPVerificationPage = () => {
@@ -14,7 +16,9 @@ const OTPVerificationPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
-  const { verifyOTP } = useAuth();
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const { verifyOTP, resendOTP } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -44,43 +48,68 @@ const OTPVerificationPage = () => {
     const otpString = otp.join('');
     
     if (otpString.length !== 6) {
+      setError('Please enter the complete 6-digit code');
       return;
     }
 
     setIsLoading(true);
-    const result = await verifyOTP(email, otpString);
-    setIsLoading(false);
-
-    if (result.success) {
-      navigate('/');
+    setError('');
+    
+    try {
+      const result = await verifyOTP(email, otpString, 'email');
+      
+      if (result.success) {
+        setSuccess('Email verified successfully! Welcome to DealShark!');
+        setTimeout(() => {
+          navigate('/');
+        }, 2000);
+      } else {
+        setError(result.error || 'Verification failed. Please try again.');
+      }
+    } catch (error) {
+      setError('Verification failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (!canResend) return;
     
-    // Implement resend OTP logic
-    console.log('Resending OTP to:', email);
+    setError('');
+    setSuccess('');
     
-    // Reset countdown
-    setCountdown(60);
-    setCanResend(false);
-    
-    // Start countdown
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          setCanResend(true);
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    try {
+      const result = await resendOTP(email, 'email');
+      
+      if (result.success) {
+        setSuccess('Verification code sent successfully!');
+        
+        // Reset countdown
+        setCountdown(60);
+        setCanResend(false);
+        
+        // Start countdown
+        const timer = setInterval(() => {
+          setCountdown(prev => {
+            if (prev <= 1) {
+              setCanResend(true);
+              clearInterval(timer);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      } else {
+        setError(result.error || 'Failed to resend code. Please try again.');
+      }
+    } catch (error) {
+      setError('Failed to resend code. Please try again.');
+    }
   };
 
   // Start countdown on component mount
-  useState(() => {
+  useEffect(() => {
     const timer = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
@@ -93,215 +122,203 @@ const OTPVerificationPage = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  });
-
-  const features = [
-    {
-      icon: ShieldCheckIcon,
-      title: 'Secure Verification',
-      description: 'Your account is protected with industry-standard security'
-    },
-    {
-      icon: SparklesIcon,
-      title: 'Instant Access',
-      description: 'Get immediate access to all DealShark features'
-    },
-    {
-      icon: CheckCircleIcon,
-      title: 'Verified Account',
-      description: 'Join our community of verified users'
-    }
-  ];
+  }, []);
 
   return (
-    <div className="min-h-screen bg-white flex">
-      {/* Left Side - Content */}
-      <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:px-12 xl:px-16">
-        <div className="max-w-md">
-          {/* Logo */}
-          <div className="flex items-center space-x-3 mb-8">
-            <div className="w-16 h-16 bg-dealshark-blue rounded-xl flex items-center justify-center">
-              <span className="text-3xl">🦈</span>
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold">
-                <span className="text-dealshark-blue">Deal</span>
-                <span className="text-dealshark-yellow">Shark</span>
-              </h1>
-              <p className="text-sm text-gray-600">Referral Platform</p>
-            </div>
-          </div>
-
-          {/* Welcome Message */}
-          <div className="mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Almost there! 🎉
-            </h2>
-            <p className="text-lg text-gray-600 leading-relaxed">
-              We've sent a verification code to your email address. 
-              Enter the code below to complete your account setup and start earning.
-            </p>
-          </div>
-
-          {/* Features */}
-          <div className="space-y-6 mb-12">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-dealshark-yellow-light rounded-lg flex items-center justify-center">
-                  <feature.icon className="h-6 w-6 text-dealshark-blue" />
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-dealshark-blue">
+      {/* Main Content */}
+      <main className="flex-1">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[calc(100vh-8rem)]">
+            
+            {/* Left Side - Welcome Section */}
+            <div className="otp-welcome animate-fade-in-left">
+              <div className="welcome-content text-white">
+                <h2 className="welcome-title text-5xl font-bold mb-6 leading-tight">
+                  Verify Your <span className="text-dealshark-yellow">Email</span>
+                </h2>
+                <p className="welcome-subtitle text-xl text-purple-100 mb-12 leading-relaxed">
+                  We've sent a verification code to your email address. Enter the code below to complete your account setup and start earning.
+                </p>
+                
+                {/* Mascot above benefits */}
+                <div className="mascot-container mb-12 animate-float">
+                  <div className="w-32 h-32 bg-dealshark-yellow rounded-2xl flex items-center justify-center text-6xl shadow-yellow">
+                    📧
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">{feature.title}</h3>
-                  <p className="text-gray-600 text-sm">{feature.description}</p>
+                
+                <div className="welcome-benefits space-y-8">
+                  <div className="benefit-item flex items-center space-x-6 group hover-lift animate-fade-in-left delay-200">
+                    <div className="benefit-icon w-16 h-16 bg-dealshark-yellow rounded-2xl flex items-center justify-center text-2xl group-hover:animate-pulse-gentle transition-all duration-300">
+                      🔒
+                    </div>
+                    <div className="benefit-text">
+                      <h4 className="text-xl font-semibold mb-2">Secure Verification</h4>
+                      <p className="text-purple-100">Your account is protected with industry-standard security</p>
+                    </div>
+                  </div>
+                  
+                  <div className="benefit-item flex items-center space-x-6 group hover-lift animate-fade-in-left delay-400">
+                    <div className="benefit-icon w-16 h-16 bg-dealshark-yellow rounded-2xl flex items-center justify-center text-2xl group-hover:animate-pulse-gentle transition-all duration-300">
+                      ⚡
+                    </div>
+                    <div className="benefit-text">
+                      <h4 className="text-xl font-semibold mb-2">Instant Access</h4>
+                      <p className="text-purple-100">Get immediate access to all DealShark features</p>
+                    </div>
+                  </div>
+                  
+                  <div className="benefit-item flex items-center space-x-6 group hover-lift animate-fade-in-left delay-600">
+                    <div className="benefit-icon w-16 h-16 bg-dealshark-yellow rounded-2xl flex items-center justify-center text-2xl group-hover:animate-pulse-gentle transition-all duration-300">
+                      ✅
+                    </div>
+                    <div className="benefit-text">
+                      <h4 className="text-xl font-semibold mb-2">Verified Account</h4>
+                      <p className="text-purple-100">Join our community of verified users</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Security Info */}
-          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-            <div className="flex items-center mb-4">
-              <ShieldCheckIcon className="h-5 w-5 text-dealshark-blue mr-2" />
-              <h3 className="font-semibold text-gray-900">Security Notice</h3>
-            </div>
-            <p className="text-sm text-gray-600 mb-4">
-              This verification code expires in 10 minutes. If you don't receive it, 
-              check your spam folder or request a new code.
-            </p>
-            <div className="flex items-center text-sm text-gray-500">
-              <ClockIcon className="h-4 w-4 mr-2" />
-              <span>Code valid for 10 minutes</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Side - OTP Form */}
-      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="mx-auto w-full max-w-md">
-          {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center justify-center space-x-2 mb-8">
-            <div className="w-12 h-12 bg-dealshark-blue rounded-xl flex items-center justify-center">
-              <span className="text-2xl">🦈</span>
-            </div>
-            <span className="text-2xl font-bold">
-              <span className="text-dealshark-blue">Deal</span>
-              <span className="text-dealshark-yellow">Shark</span>
-            </span>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-dealshark-yellow-light rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">📧</span>
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                Verify your email
-              </h2>
-              <p className="text-gray-600 mb-2">
-                We've sent a 6-digit code to
-              </p>
-              <p className="font-semibold text-gray-900">{email}</p>
             </div>
 
-            {/* OTP Form */}
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="flex justify-center space-x-3">
-                {otp.map((digit, index) => (
-                  <input
-                    key={index}
-                    id={`otp-${index}`}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={digit}
-                    onChange={(e) => handleOtpChange(index, e.target.value)}
-                    className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-dealshark-blue focus:border-dealshark-blue transition-all duration-200"
-                    maxLength="1"
-                  />
-                ))}
-              </div>
+            {/* Right Side - OTP Form */}
+            <div className="otp-form-container animate-fade-in-right">
+              <div className="otp-form-wrapper auth-card">
+                <h1 className="otp-title text-3xl font-bold text-gray-900 mb-8 text-center">
+                  Email Verification
+                </h1>
+                
+                <div className="verification-info text-center mb-8">
+                  <div className="w-20 h-20 bg-gradient-to-br from-dealshark-blue to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <EnvelopeIcon className="h-10 w-10 text-white" />
+                  </div>
+                  <p className="text-gray-600 mb-2">
+                    We've sent a 6-digit code to
+                  </p>
+                  <p className="font-semibold text-gray-900 text-lg">{email}</p>
+                </div>
 
-              <div>
-                <button
-                  type="submit"
-                  disabled={isLoading || otp.join('').length !== 6}
-                  className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dealshark-blue transition-all duration-200 ${
-                    isLoading || otp.join('').length !== 6
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-dealshark-blue hover:bg-dealshark-blue-dark transform hover:scale-[1.02]'
-                  }`}
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                      Verifying...
-                    </>
-                  ) : (
-                    <>
-                      <span>Verify Email</span>
-                      <CheckCircleIcon className="h-5 w-5 ml-2" />
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-
-            {/* Resend Section */}
-            <div className="mt-8 text-center">
-              <div className="mb-4">
-                {canResend ? (
-                  <button
-                    onClick={handleResend}
-                    className="inline-flex items-center text-dealshark-blue hover:text-dealshark-blue-dark font-medium transition-colors"
-                  >
-                    <ArrowPathIcon className="h-4 w-4 mr-2" />
-                    Resend code
-                  </button>
-                ) : (
-                  <div className="flex items-center justify-center text-gray-500">
-                    <ClockIcon className="h-4 w-4 mr-2" />
-                    <span>Resend code in {countdown}s</span>
+                {error && (
+                  <div className="error-message mb-6 p-4 bg-red-50 border border-red-200 rounded-xl animate-slide-in-top">
+                    <p className="text-red-600 text-sm font-medium">{error}</p>
                   </div>
                 )}
-              </div>
-              
-              <p className="text-xs text-gray-500">
-                Didn't receive the code? Check your spam folder or{' '}
-                <button className="text-dealshark-blue hover:text-dealshark-blue-dark underline">
-                  contact support
-                </button>
-              </p>
-            </div>
 
-            {/* Progress Indicator */}
-            <div className="mt-8">
-              <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
-                <div className="flex items-center">
-                  <div className="w-6 h-6 bg-dealshark-blue rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
-                    1
+                {success && (
+                  <div className="success-message mb-6 p-4 bg-green-50 border border-green-200 rounded-xl animate-slide-in-top">
+                    <p className="text-green-600 text-sm font-medium">{success}</p>
                   </div>
-                  <span>Sign Up</span>
+                )}
+
+                {/* OTP Form */}
+                <form className="otp-form space-y-8" onSubmit={handleSubmit}>
+                  <div className="otp-inputs flex justify-center space-x-3 animate-fade-in-up delay-200">
+                    {otp.map((digit, index) => (
+                      <input
+                        key={index}
+                        id={`otp-${index}`}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-dealshark-blue focus:border-dealshark-blue transition-all duration-200 hover:border-dealshark-blue"
+                        maxLength="1"
+                        disabled={isLoading}
+                      />
+                    ))}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading || otp.join('').length !== 6}
+                    className="verify-btn w-full btn-secondary flex items-center justify-center space-x-2 animate-fade-in-up delay-400"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-gray-900 border-t-transparent rounded-full animate-spin"></div>
+                        <span>Verifying...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Verify Email</span>
+                        <CheckCircleIcon className="h-5 w-5" />
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Resend Section */}
+                <div className="resend-section mt-8 text-center animate-fade-in-up delay-600">
+                  <div className="mb-4">
+                    {canResend ? (
+                      <button
+                        onClick={handleResend}
+                        className="resend-btn inline-flex items-center text-dealshark-blue hover:text-blue-700 font-semibold transition-colors duration-300"
+                      >
+                        <ArrowPathIcon className="h-4 w-4 mr-2" />
+                        Resend code
+                      </button>
+                    ) : (
+                      <div className="flex items-center justify-center text-gray-500">
+                        <ClockIcon className="h-4 w-4 mr-2" />
+                        <span className="font-medium">Resend code in {countdown}s</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <p className="text-xs text-gray-500 mb-6">
+                    Didn't receive the code? Check your spam folder or{' '}
+                    <button className="text-dealshark-blue hover:text-blue-700 underline font-medium">
+                      contact support
+                    </button>
+                  </p>
                 </div>
-                <div className="w-8 h-0.5 bg-dealshark-blue"></div>
-                <div className="flex items-center">
-                  <div className="w-6 h-6 bg-dealshark-blue rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
-                    2
+
+                {/* Progress Indicator */}
+                <div className="progress-indicator mt-8 animate-fade-in-up delay-800">
+                  <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 bg-dealshark-blue rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
+                        1
+                      </div>
+                      <span className="font-medium">Sign Up</span>
+                    </div>
+                    <div className="w-8 h-0.5 bg-dealshark-blue"></div>
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 bg-dealshark-blue rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
+                        2
+                      </div>
+                      <span className="font-medium">Verify Email</span>
+                    </div>
+                    <div className="w-8 h-0.5 bg-gray-300"></div>
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-gray-500 text-xs font-bold mr-2">
+                        3
+                      </div>
+                      <span className="font-medium">Complete</span>
+                    </div>
                   </div>
-                  <span>Verify Email</span>
                 </div>
-                <div className="w-8 h-0.5 bg-gray-300"></div>
-                <div className="flex items-center">
-                  <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-gray-500 text-xs font-bold mr-2">
-                    3
-                  </div>
-                  <span>Complete</span>
+
+                {/* Back to Login */}
+                <div className="otp-footer mt-8 text-center animate-fade-in-up delay-1000">
+                  <p className="text-gray-600 text-responsive-base">
+                    Need help?{' '}
+                    <button 
+                      className="login-link text-dealshark-blue hover:text-blue-700 font-bold transition-colors duration-300 hover:underline"
+                      onClick={() => navigate('/login')}
+                    >
+                      Contact Support
+                    </button>
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

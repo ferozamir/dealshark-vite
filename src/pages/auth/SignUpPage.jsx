@@ -78,25 +78,25 @@ const SignUpPage = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await register(formData.email, formData.password, formData.user_type, {
-        email: formData.email,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        phone_number: formData.phone_number,
-        user_type: formData.user_type,
-        password: formData.password,
-        confirm_password: formData.confirm_password,
-        profile_picture: formData.profilePicture ? 'url' : null
-      });
+      const result = await register(
+        formData.firstName,
+        formData.lastName,
+        formData.email,
+        formData.phone_number,
+        formData.password,
+        formData.confirm_password,
+        formData.user_type,
+        formData.profilePicture
+      );
 
       if (result.success) {
         setSuccess('Registration successful! Please check your email for verification.');
         setTimeout(() => {
-          navigate('/otp-verification', { 
-            state: { 
+          navigate('/otp-verification', {
+            state: {
               email: formData.email,
               password: formData.password
-            } 
+            }
           });
         }, 2000);
       } else {
@@ -108,7 +108,7 @@ const SignUpPage = () => {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-dealshark-blue">
 
@@ -116,7 +116,7 @@ const SignUpPage = () => {
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[calc(100vh-8rem)]">
-            
+
             {/* Left Side - Welcome Section */}
             <div className="signup-welcome animate-fade-in-left">
               <div className="welcome-content text-white">
@@ -126,14 +126,14 @@ const SignUpPage = () => {
                 <p className="welcome-subtitle text-xl text-purple-100 mb-12 leading-relaxed">
                   Start earning commissions from top brands and discover exclusive deals tailored just for you.
                 </p>
-                
+
                 {/* Mascot above benefits */}
                 <div className="mascot-container mb-12 animate-float">
                   <div className="w-32 h-32 bg-dealshark-yellow rounded-2xl flex items-center justify-center text-6xl shadow-yellow">
                     🦈
                   </div>
                 </div>
-                
+
                 <div className="welcome-benefits space-y-8">
                   <div className="benefit-item flex items-center space-x-6 group hover-lift animate-fade-in-left delay-200">
                     <div className="benefit-icon w-16 h-16 bg-dealshark-yellow rounded-2xl flex items-center justify-center text-2xl group-hover:animate-pulse-gentle transition-all duration-300">
@@ -144,7 +144,7 @@ const SignUpPage = () => {
                       <p className="text-purple-100">Get paid for every successful referral you make</p>
                     </div>
                   </div>
-                  
+
                   <div className="benefit-item flex items-center space-x-6 group hover-lift animate-fade-in-left delay-400">
                     <div className="benefit-icon w-16 h-16 bg-dealshark-yellow rounded-2xl flex items-center justify-center text-2xl group-hover:animate-pulse-gentle transition-all duration-300">
                       🏆
@@ -154,7 +154,7 @@ const SignUpPage = () => {
                       <p className="text-purple-100">Access special offers not available to the public</p>
                     </div>
                   </div>
-                  
+
                   <div className="benefit-item flex items-center space-x-6 group hover-lift animate-fade-in-left delay-600">
                     <div className="benefit-icon w-16 h-16 bg-dealshark-yellow rounded-2xl flex items-center justify-center text-2xl group-hover:animate-pulse-gentle transition-all duration-300">
                       📊
@@ -174,24 +174,22 @@ const SignUpPage = () => {
                 <h1 className="signup-title text-3xl font-bold text-gray-900 mb-8 text-center">
                   Sign up to DealShark
                 </h1>
-                
+
                 <div className="signup-type-switch flex bg-gray-100 rounded-xl p-1 mb-8">
-                  <button 
-                    className={`switch-btn flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                      !isBusinessSignup
-                        ? 'bg-white text-dealshark-blue shadow-lg transform scale-105'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                    }`}
+                  <button
+                    className={`switch-btn flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ${!isBusinessSignup
+                      ? 'bg-white text-dealshark-blue shadow-lg transform scale-105'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      }`}
                     onClick={() => setIsBusinessSignup(false)}
                   >
                     Personal Account
                   </button>
-                  <button 
-                    className={`switch-btn flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                      isBusinessSignup
-                        ? 'bg-white text-dealshark-blue shadow-lg transform scale-105'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                    }`}
+                  <button
+                    className={`switch-btn flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ${isBusinessSignup
+                      ? 'bg-white text-dealshark-blue shadow-lg transform scale-105'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      }`}
                     onClick={() => setIsBusinessSignup(true)}
                   >
                     Business Account
@@ -302,7 +300,7 @@ const SignUpPage = () => {
                           )}
                         </button>
                       </div>
-                      
+
                       {/* Password Strength Indicator */}
                       {formData.password && (
                         <div className="mt-3">
@@ -378,8 +376,8 @@ const SignUpPage = () => {
                     </div>
                   </div>
 
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className="signup-btn w-full btn-secondary flex items-center justify-center space-x-2 animate-fade-in-up delay-900"
                     disabled={isSubmitting}
                   >
@@ -400,7 +398,7 @@ const SignUpPage = () => {
                 <div className="signup-footer mt-8 text-center animate-fade-in-up delay-1000">
                   <p className="text-gray-600 text-responsive-base">
                     Already have an account?{' '}
-                    <button 
+                    <button
                       className="login-link text-dealshark-blue hover:text-blue-700 font-bold transition-colors duration-300 hover:underline"
                       onClick={() => navigate('/login')}
                     >
@@ -408,7 +406,7 @@ const SignUpPage = () => {
                     </button>
                   </p>
                 </div>
-                
+
                 <div className="signup-divider mt-8 mb-6 animate-fade-in-up delay-1100">
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
@@ -419,7 +417,7 @@ const SignUpPage = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="social-signup grid grid-cols-2 gap-4 animate-fade-in-up delay-1200">
                   <button className="social-btn google-btn flex items-center justify-center px-4 py-3 border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 hover-lift">
                     <span className="mr-2">🔍</span>
