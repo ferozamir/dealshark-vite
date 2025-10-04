@@ -272,6 +272,29 @@ export const authService = {
     }
   },
 
+  // Update user profile
+  updateUser: async (userId, updateData) => {
+    try {
+      const response = await api.patch(`/auth/user/${userId}/profile`, updateData);
+
+      if (response.success) {
+        return {
+          success: true,
+          message: response.data.message || 'User updated successfully.',
+          data: response.data,
+        };
+      }
+
+      throw new Error('Failed to update user. Invalid response from server.');
+    } catch (error) {
+      console.error('Update user error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to update user. Please try again.',
+      };
+    }
+  },
+
   // Logout
   logout: () => {
     tokenManager.clearTokens();

@@ -221,7 +221,7 @@ const MySubscribersPage = () => {
           </div>
 
           {/* Business Details Card */}
-          <div className="business-details-card auth-card mb-8">
+          {/* <div className="business-details-card auth-card mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Business Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="detail-item">
@@ -278,7 +278,7 @@ const MySubscribersPage = () => {
                 <p className="text-gray-600">{subscribersData?.business?.industry || business?.industry || 'Not specified'}</p>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Subscribers Section */}
           <div className="subscribers-section auth-card">
