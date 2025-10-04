@@ -150,7 +150,7 @@ const ProfilePage = () => {
     }
   };
 
-  const handlePasswordChange = async (e) => {
+  const handlePasswordUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -617,7 +617,7 @@ const ProfilePage = () => {
                 </div>
 
                 {isChangingPassword && (
-                  <form onSubmit={handlePasswordChange} className="bg-gray-50 rounded-xl p-6">
+                  <form onSubmit={handlePasswordUpdate} className="bg-gray-50 rounded-xl p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="form-group">
                         <label className="form-label uppercase">CURRENT PASSWORD*</label>
