@@ -31,7 +31,7 @@ const DealsPage = () => {
       setLoading(true);
       const result = await dealsService.getAllDeals();
       
-      if (result.success) {
+      if (result?.deals) {
         setDeals(result.deals || []);
       } else {
         setError(result.error);
