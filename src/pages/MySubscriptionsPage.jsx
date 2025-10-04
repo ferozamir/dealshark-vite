@@ -14,7 +14,7 @@ import toast from 'react-hot-toast';
 
 const MySubscriptionsPage = () => {
   const { user } = useAuth();
-  const [subscriptions, setSubscriptions] = useState([]);
+  const [subscriptionsData, setSubscriptionsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -28,7 +28,7 @@ const MySubscriptionsPage = () => {
       const result = await referralsService.getMySubscriptions();
       
       if (result.success) {
-        setSubscriptions(result.data.subscriptions || []);
+        setSubscriptionsData(result.data);
       } else {
         setError(result.error || 'Failed to fetch subscriptions');
       }
@@ -80,6 +80,8 @@ const MySubscriptionsPage = () => {
   const getRewardDisplay = (deal) => {
     if (deal.reward_type === 'commission') {
       return `${deal.customer_incentive}% Referral Bonus`;
+    } else if (deal.reward_type === 'no_reward') {
+      return `${deal.customer_incentive}% Referral Bonus`;
     } else {
       return `${deal.customer_incentive}% Referral Bonus`;
     }
@@ -89,6 +91,13 @@ const MySubscriptionsPage = () => {
     if (!email) return 'TU';
     const name = email.split('@')[0];
     return name.substring(0, 2).toUpperCase();
+  };
+
+  const getUserDisplayName = (email) => {
+    if (!email) return 'Test User';
+    const name = email.split('@')[0];
+    // Convert to title case
+    return name.charAt(0).toUpperCase() + name.slice(1) + ' User';
   };
 
   return (
@@ -141,7 +150,7 @@ const MySubscriptionsPage = () => {
               <div className="w-24 h-24 bg-white rounded-2xl flex items-center justify-center border-4 border-white shadow-lg">
                 <div className="w-16 h-16 bg-gray-200 rounded-xl flex items-center justify-center">
                   <span className="text-2xl font-bold text-gray-600">
-                    {getUserInitials(user?.email)}
+                    {getUserInitials(subscriptionsData?.referrer?.email || user?.email)}
                   </span>
                 </div>
               </div>
@@ -149,9 +158,9 @@ const MySubscriptionsPage = () => {
               {/* User Info */}
               <div>
                 <h1 className="text-4xl font-bold text-white mb-2">
-                  {user?.first_name || user?.email?.split('@')[0] || 'User'}
+                  {getUserDisplayName(subscriptionsData?.referrer?.email || user?.email)}
                 </h1>
-                <p className="text-blue-100 text-lg">{user?.email}</p>
+                <p className="text-blue-100 text-lg">{subscriptionsData?.referrer?.email || user?.email}</p>
               </div>
             </div>
 
@@ -207,7 +216,7 @@ const MySubscriptionsPage = () => {
                 Try Again
               </button>
             </div>
-          ) : subscriptions.length === 0 ? (
+          ) : !subscriptionsData || subscriptionsData.subscriptions.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-gray-400 text-6xl mb-4">📋</div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Subscriptions Yet</h3>
@@ -215,7 +224,7 @@ const MySubscriptionsPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {subscriptions.map((subscription) => (
+              {subscriptionsData.subscriptions.map((subscription) => (
                 <div key={subscription.subscription_id} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
                   {/* Business Info */}
                   <div className="flex items-center space-x-4 mb-4">
