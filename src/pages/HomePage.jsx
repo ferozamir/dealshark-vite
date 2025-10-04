@@ -1,101 +1,94 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { dealsService } from '../services';
 import { 
   MagnifyingGlassIcon,
   StarIcon,
   UsersIcon,
   ArrowTrendingUpIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  CurrencyDollarIcon,
+  GiftIcon
 } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
 
 const HomePage = () => {
-  const { isAuthenticated, userType } = useAuth();
+  const { isAuthenticated, userType, user } = useAuth();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [deals, setDeals] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDeals();
+  }, []);
+
+  const fetchDeals = async () => {
+    try {
+      setLoading(true);
+      const result = await dealsService.getAllDeals();
+      
+      if (result?.deals) {
+        // Take only the first 6 deals for homepage
+        setDeals(result.deals.slice(0, 6));
+      } else {
+        console.error('Failed to fetch deals:', result.error);
+      }
+    } catch (error) {
+      console.error('Error fetching deals:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       // Navigate to deals page with search query
-      console.log('Searching for:', searchQuery);
+      navigate(`/deals?search=${encodeURIComponent(searchQuery)}`);
     }
   };
 
-  // Mock data for today's top offers
-  const todaysOffers = [
-    {
-      id: 1,
-      businessName: 'Fresh Bites Cafe',
-      dealTitle: 'Free Coffee with Breakfast',
-      bonusPercentage: 5.00,
-      subscribers: 0,
-      image: '☕',
-      category: 'Food & Dining'
-    },
-    {
-      id: 2,
-      businessName: 'TechStore Pro',
-      dealTitle: 'Electronics Sale',
-      bonusPercentage: 10.00,
-      subscribers: 0,
-      image: '📱',
-      category: 'Electronics'
-    },
-    {
-      id: 3,
-      businessName: 'Fashion Hub',
-      dealTitle: 'Summer Collection',
-      bonusPercentage: 15.00,
-      subscribers: 0,
-      image: '👗',
-      category: 'Fashion'
-    },
-    {
-      id: 4,
-      businessName: 'Beauty Store',
-      dealTitle: 'Skincare Bundle',
-      bonusPercentage: 15.00,
-      subscribers: 1,
-      image: '💄',
-      category: 'Beauty'
-    },
-    {
-      id: 5,
-      businessName: 'Fitness Center',
-      dealTitle: 'Gym Membership',
-      bonusPercentage: 25.00,
-      subscribers: 0,
-      image: '💪',
-      category: 'Fitness'
-    },
-    {
-      id: 6,
-      businessName: 'Travel Agency',
-      dealTitle: 'Holiday Packages',
-      bonusPercentage: 8.00,
-      subscribers: 0,
-      image: '✈️',
-      category: 'Travel'
-    },
-    {
-      id: 7,
-      businessName: 'Home Decor',
-      dealTitle: 'Interior Design',
-      bonusPercentage: 15.00,
-      subscribers: 0,
-      image: '🏠',
-      category: 'Home'
-    },
-    {
-      id: 8,
-      businessName: 'Book Store',
-      dealTitle: 'Best Sellers',
-      bonusPercentage: 22.00,
-      subscribers: 1,
-      image: '📚',
-      category: 'Books'
+  const handleDealClick = (dealId) => {
+    navigate(`/deal/${dealId}`);
+  };
+
+  const getDealIcon = (industry) => {
+    const icons = {
+      'Food': '🍽️',
+      'Electronics': '📱',
+      'Fashion': '👗',
+      'Beauty': '💄',
+      'Fitness': '💪',
+      'Travel': '✈️',
+      'Home': '🏠',
+      'Books': '📚',
+      'Crafting': '🎨',
+      'Automotive': '🚗',
+      'Sports': '⚽',
+      'Health': '🏥',
+      'Education': '📚',
+      'Entertainment': '🎬'
+    };
+    return icons[industry] || '🛍️';
+  };
+
+  const getRewardDisplay = (deal) => {
+    if (deal.reward_type === 'commission') {
+      return `$${parseFloat(deal.customer_incentive).toFixed(2)} Commission`;
+    } else {
+      return 'Special Offer';
     }
-  ];
+  };
+
+  const getRewardColor = (deal) => {
+    if (deal.reward_type === 'commission') {
+      return 'from-green-500 to-emerald-500';
+    } else {
+      return 'from-blue-500 to-indigo-500';
+    }
+  };
 
   const stats = [
     { label: 'Active Users', value: '10K+', icon: UsersIcon },
@@ -257,55 +250,104 @@ const HomePage = () => {
           </div>
 
           {/* Offers Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {todaysOffers.map((offer) => (
-              <div key={offer.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
-                {/* Card Header */}
-                <div className="relative p-6 pb-4">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="text-4xl">{offer.image}</div>
-                    <div className="bg-red-500 text-white text-xs px-3 py-1 rounded-full flex items-center font-semibold">
-                      <span className="mr-1">🔥</span>
-                      HOT
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse">
+                  <div className="p-6 pb-4">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                      <div className="w-16 h-6 bg-gray-200 rounded-full"></div>
+                    </div>
+                    <div className="w-20 h-4 bg-gray-200 rounded-full mb-4"></div>
+                    <div className="w-full h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="w-3/4 h-4 bg-gray-200 rounded mb-4"></div>
+                    <div className="w-24 h-6 bg-gray-200 rounded mb-4"></div>
+                    <div className="w-full h-10 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : deals.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {deals.map((deal) => (
+                <div key={deal.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden cursor-pointer" onClick={() => handleDealClick(deal.id)}>
+                  {/* Card Header */}
+                  <div className="relative p-6 pb-4">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-dealshark-blue to-blue-600 rounded-xl flex items-center justify-center">
+                        {deal.business?.business_logo_url ? (
+                          <img
+                            src={deal.business.business_logo_url}
+                            alt={deal.business.business_name}
+                            className="w-14 h-14 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <span className="text-white text-2xl">
+                            {getDealIcon(deal.business?.industry)}
+                          </span>
+                        )}
+                      </div>
+                      {deal.is_featured && (
+                        <div className="bg-red-500 text-white text-xs px-3 py-1 rounded-full flex items-center font-semibold">
+                          <StarIcon className="h-3 w-3 mr-1 fill-current" />
+                          FEATURED
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Category Badge */}
+                    <div className="absolute top-4 left-6 bg-dealshark-yellow text-gray-900 text-xs px-2 py-1 rounded-full font-medium">
+                      {deal.business?.industry || 'General'}
                     </div>
                   </div>
 
-                  {/* Category Badge */}
-                  <div className="absolute top-4 left-6 bg-dealshark-yellow text-gray-900 text-xs px-2 py-1 rounded-full font-medium">
-                    {offer.category}
+                  {/* Card Content */}
+                  <div className="px-6 pb-6">
+                    <h3 className="font-bold text-gray-900 text-lg mb-1 line-clamp-1">
+                      {deal.business?.business_name}
+                    </h3>
+                    <p className="text-gray-700 text-sm mb-4 line-clamp-2">
+                      {deal.deal_name}
+                    </p>
+                    
+                    {/* Reward Badge */}
+                    <div className="mb-4">
+                      <div className={`inline-flex items-center px-3 py-1 rounded-full text-white text-sm font-semibold bg-gradient-to-r ${getRewardColor(deal)}`}>
+                        {deal.reward_type === 'commission' ? (
+                          <CurrencyDollarIcon className="h-3 w-3 mr-1" />
+                        ) : (
+                          <GiftIcon className="h-3 w-3 mr-1" />
+                        )}
+                        {getRewardDisplay(deal)}
+                      </div>
+                    </div>
+                    
+                    {/* Subscribers */}
+                    <div className="flex items-center text-sm text-gray-600 mb-4">
+                      <UsersIcon className="h-4 w-4 mr-1" />
+                      <span>{deal.subscribers_count || 0} users subscribed</span>
+                    </div>
+
+                    {/* Action Button */}
+                    <div className={`w-full py-3 px-4 rounded-lg font-semibold text-center transition-all duration-300 transform hover:scale-105 shadow-md ${
+                      deal.subscription_info?.is_subscribed 
+                        ? 'bg-green-600 hover:bg-green-700 text-white' 
+                        : 'bg-dealshark-blue hover:bg-blue-700 text-white'
+                    }`}>
+                      {deal.subscription_info?.is_subscribed ? 'View Deal' : 'Subscribe Now'}
+                    </div>
                   </div>
                 </div>
-
-                {/* Card Content */}
-                <div className="px-6 pb-6">
-                  <h3 className="font-bold text-gray-900 text-lg mb-1 line-clamp-1">
-                    {offer.businessName}
-                  </h3>
-                  <p className="text-gray-700 text-sm mb-4 line-clamp-2">
-                    {offer.dealTitle}
-                  </p>
-                  
-                  {/* Bonus Percentage */}
-                  <div className="mb-4">
-                    <span className="text-2xl font-bold text-dealshark-blue">
-                      {offer.bonusPercentage.toFixed(1)}% Bonus
-                    </span>
-                  </div>
-                  
-                  {/* Subscribers */}
-                  <div className="flex items-center text-sm text-gray-600 mb-4">
-                    <UsersIcon className="h-4 w-4 mr-1" />
-                    <span>{offer.subscribers} users subscribed</span>
-                  </div>
-
-                  {/* Subscribe Button */}
-                  <button className="w-full bg-dealshark-blue text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-md">
-                    Subscribe Now
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-gray-400 text-6xl mb-4">🦈</div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No deals available</h3>
+              <p className="text-gray-600">Check back later for exciting new deals!</p>
+            </div>
+          )}
 
           {/* View More Button */}
           <div className="text-center mt-12">

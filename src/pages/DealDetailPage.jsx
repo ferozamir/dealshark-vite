@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { dealsService, referralsService } from '../services';
-import { 
+import {
   StarIcon,
   UserGroupIcon,
   CurrencyDollarIcon,
   GiftIcon,
   ShareIcon,
-  CopyIcon,
+  ClipboardIcon,
   CheckIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
@@ -26,6 +26,7 @@ const DealDetailPage = () => {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    debugger
     if (dealId) {
       fetchDealDetails();
     }
@@ -34,9 +35,9 @@ const DealDetailPage = () => {
   const fetchDealDetails = async () => {
     try {
       setLoading(true);
-      const result = await dealsService.getDealById(dealId, user?.id);
-      
-      if (result.success) {
+      const result = await dealsService.getDeal(dealId, user?.id);
+
+      if (result?.success) {
         setDeal(result.deal);
       } else {
         setError(result.error);
@@ -58,7 +59,7 @@ const DealDetailPage = () => {
 
     try {
       setSubscribing(true);
-      
+
       if (deal.subscription_info?.is_subscribed) {
         // Unsubscribe
         const result = await referralsService.unsubscribeFromDeal(dealId, user.id);
@@ -269,10 +270,10 @@ const DealDetailPage = () => {
                     <div className="space-y-2 text-sm text-gray-600">
                       <p><span className="font-medium">Email:</span> {deal.business?.business_email}</p>
                       <p><span className="font-medium">Phone:</span> {deal.business?.business_phone}</p>
-                      <p><span className="font-medium">Website:</span> 
-                        <a 
-                          href={deal.business?.website} 
-                          target="_blank" 
+                      <p><span className="font-medium">Website:</span>
+                        <a
+                          href={deal.business?.website}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="text-dealshark-blue hover:underline ml-1"
                         >
@@ -326,7 +327,7 @@ const DealDetailPage = () => {
                         {copied ? (
                           <CheckIcon className="h-4 w-4 text-green-600" />
                         ) : (
-                          <CopyIcon className="h-4 w-4 text-gray-600" />
+                          <ClipboardIcon className="h-4 w-4 text-gray-600" />
                         )}
                       </button>
                     </div>
@@ -354,11 +355,10 @@ const DealDetailPage = () => {
                 <button
                   onClick={handleSubscribe}
                   disabled={subscribing}
-                  className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors ${
-                    deal.subscription_info?.is_subscribed
-                      ? 'bg-red-600 hover:bg-red-700 text-white'
-                      : 'bg-dealshark-blue hover:bg-blue-700 text-white'
-                  } ${subscribing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors ${deal.subscription_info?.is_subscribed
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-dealshark-blue hover:bg-blue-700 text-white'
+                    } ${subscribing ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {subscribing ? (
                     <div className="flex items-center justify-center">
