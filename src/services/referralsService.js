@@ -76,6 +76,28 @@ export const referralsService = {
     }
   },
 
+  // Get my subscribers (alias for getBusinessSubscribers)
+  getMySubscribers: async (businessId) => {
+    try {
+      const response = await api.get(API_ENDPOINTS.REFERRALS.MY_SUBSCRIBERS(businessId));
+
+      if (response.success) {
+        return {
+          success: true,
+          data: response.data, // Return the full response data including business info
+        };
+      }
+
+      throw new Error('Failed to fetch subscribers. Invalid response from server.');
+    } catch (error) {
+      console.error('Get my subscribers error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to fetch subscribers. Please try again.',
+      };
+    }
+  },
+
   // Get user's subscriptions (customer view)
   getMySubscriptions: async () => {
     try {
