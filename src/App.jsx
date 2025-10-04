@@ -16,7 +16,7 @@ import DealDetailPage from './pages/DealDetailPage';
 import BusinessProfile from './pages/BusinessProfile';
 import CreateDealPage from './pages/business/CreateDealPage';
 import BusinessDealsPage from './pages/business/BusinessDealsPage';
-import MySubscriptionsPage from './pages/customer/MySubscriptionsPage';
+import MySubscriptionsPage from './pages/MySubscriptionsPage';
 import MySubscribersPage from './pages/business/MySubscribersPage';
 import ProfilePage from './pages/ProfilePage';
 

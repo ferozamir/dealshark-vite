@@ -84,8 +84,7 @@ export const referralsService = {
       if (response.success) {
         return {
           success: true,
-          subscriptions: response.data,
-          total: response.data.length,
+          data: response.data, // Return the full response data including referrer info
         };
       }
 
