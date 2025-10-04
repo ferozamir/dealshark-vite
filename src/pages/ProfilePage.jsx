@@ -132,7 +132,6 @@ const ProfilePage = () => {
       if (userType === 'business') {
         result = await authService.updateBusiness(business.id, formData);
       } else {
-        // For regular users, we might need a different endpoint
         result = await authService.updateUser(user.id, formData);
       }
 
@@ -171,14 +170,16 @@ const ProfilePage = () => {
     }
 
     try {
-      // This would need to be implemented in authService
-      // const result = await authService.changePassword(passwordData);
+      const result = await authService.changePassword(passwordData);
       
-      // For now, simulate success
-      setSuccess('Password changed successfully!');
-      setPasswordData({ current_password: '', new_password: '', confirm_password: '' });
-      setIsChangingPassword(false);
-      toast.success('Password changed successfully!');
+      if (result.success) {
+        setSuccess('Password changed successfully!');
+        setPasswordData({ current_password: '', new_password: '', confirm_password: '' });
+        setIsChangingPassword(false);
+        toast.success('Password changed successfully!');
+      } else {
+        setError(result.error || 'Failed to change password');
+      }
     } catch (error) {
       setError('Failed to change password. Please try again.');
     } finally {

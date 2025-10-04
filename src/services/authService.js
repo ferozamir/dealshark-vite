@@ -295,6 +295,31 @@ export const authService = {
     }
   },
 
+  // Change password
+  changePassword: async (passwordData) => {
+    try {
+      const response = await api.post('/auth/change-password/', {
+        current_password: passwordData.current_password,
+        new_password: passwordData.new_password,
+      });
+
+      if (response.success) {
+        return {
+          success: true,
+          message: response.data.message || 'Password changed successfully.',
+        };
+      }
+
+      throw new Error('Failed to change password. Invalid response from server.');
+    } catch (error) {
+      console.error('Change password error:', error);
+      return {
+        success: false,
+        error: error.detail || error.message || 'Failed to change password. Please try again.',
+      };
+    }
+  },
+
   // Logout
   logout: () => {
     tokenManager.clearTokens();
